@@ -47,13 +47,16 @@ export class SocketService {
   }
 
   private setupSocketListeners(): void {
+    // Type casting to fix ngx-socket-io types issue
+    const socketAny = this.socket as any;
+
     // Connection events
-    this.socket.on('connect', () => {
+    socketAny.on('connect', () => {
       console.log('✅ Socket connected');
       this.isConnected = true;
     });
 
-    this.socket.on('disconnect', (reason: string) => {
+    socketAny.on('disconnect', (reason: string) => {
       console.log('❌ Socket disconnected:', reason);
       this.isConnected = false;
 
@@ -68,40 +71,40 @@ export class SocketService {
       }
     });
 
-    this.socket.on('error', (error: any) => {
+    socketAny.on('error', (error: any) => {
       console.error('❌ Socket error:', error);
     });
 
     // Socket ID
-    this.socket.on('emitSocketId', (data: any) => {
+    socketAny.on('emitSocketId', (data: any) => {
       this.socketId = data.msg;
       console.log('🆔 Socket ID:', this.socketId);
     });
 
     // Authentication
-    this.socket.on('authenticated', () => {
+    socketAny.on('authenticated', () => {
       console.log('✅ Socket authenticated');
     });
 
-    this.socket.on('unauthorized', (error: any) => {
+    socketAny.on('unauthorized', (error: any) => {
       console.error('❌ Socket unauthorized:', error);
     });
 
     // Data events
-    this.socket.on('emitPosts', (data: any) => {
+    socketAny.on('emitPosts', (data: any) => {
       console.log('📦 Posts received:', data);
       this.isFetched = true;
       this.postsSubject.next(data);
     });
 
-    this.socket.on('emitAlerts', (data: any) => {
+    socketAny.on('emitAlerts', (data: any) => {
       console.log('🔔 Alerts received:', data);
       if (data.posts) {
         this.archiveSubject.next(data.posts);
       }
     });
 
-    this.socket.on('emitUpdate', (data: any) => {
+    socketAny.on('emitUpdate', (data: any) => {
       console.log('🔄 Update received:', data);
       this.lastChangeSocketId = data.msg || '';
       if (data.posts && data.posts[0]) {
@@ -109,7 +112,7 @@ export class SocketService {
       }
     });
 
-    this.socket.on('emitError', (error: any) => {
+    socketAny.on('emitError', (error: any) => {
       console.error('❌ Server error:', error);
     });
   }
@@ -185,5 +188,9 @@ export class SocketService {
 
   hasFetchedData(): boolean {
     return this.isFetched;
+  }
+
+  delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }

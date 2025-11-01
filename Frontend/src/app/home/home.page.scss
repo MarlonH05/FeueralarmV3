@@ -25,3 +25,36 @@
 #container a {
   text-decoration: none;
 }
+
+ion-content {
+  --background: var(--ion-background-color);
+}
+
+h1 {
+  color: var(--text-primary);
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  color: var(--text-secondary);
+  font-size: 1.1rem;
+}
+
+ion-card {
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-md);
+
+  ion-card-title {
+    color: var(--text-primary);
+  }
+
+  ion-card-content {
+    color: var(--text-secondary);
+  }
+}
+
+ion-button {
+  --background: var(--brand-primary);
+  --color: white;
+}
