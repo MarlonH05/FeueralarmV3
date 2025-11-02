@@ -13,7 +13,7 @@ REPO_SSH="git@github.com:MarlonH05/FeueralarmV3.git"  # Repo-URL (SSH)
 echo "==> Check SSH-Verbindung zu $REMOTE"
 ssh -o BatchMode=yes "$REMOTE" 'echo ok' >/dev/null
 
-# ========= REPO HOLEN/UPDATEN (mit Reset, damit nie lokale Änderungen blockieren) =========
+# ========= REPO HOLEN/UPDATEN (mit Reset/Clean) =========
 echo "==> Repo aktualisieren (Branch: $BRANCH)"
 ssh "$REMOTE" "set -e; \
   if [ -d '$REPO_DIR/.git' ]; then \
@@ -28,33 +28,35 @@ ssh "$REMOTE" "set -e; \
     cd '$REPO_DIR' && git checkout '$BRANCH'; \
   fi"
 
-# ========= VERZEICHNISSE SICHERSTELLEN =========
+# ========= VERZEICHNIS SICHERSTELLEN =========
 echo '==> Verzeichnisse sicherstellen'
 ssh "$REMOTE" "set -e; sudo mkdir -p '$WEBROOT'; sudo chown -R \$USER '$APP_ROOT'"
 
-# ========= PACKAGE-FIXES + INSTALL =========
-# - zone.js auf ~0.14.10 (kompatibel zu Angular 18)
-# - ngx-socket-io auf 4.6.0 (peer-Konflikte umgehen; falls weiterhin Konflikte, wird legacy-peer-deps genutzt)
-# - @auth0/angular-jwt sicherstellen
-# - ggf. fehlerhaften 'zone': { js: ... } Eintrag entfernen
-echo '==> Package-Fixes anwenden und Dependencies installieren'
+# ========= PACKAGE-FIXES =========
+echo '==> Package-Fixes anwenden'
 ssh "$REMOTE" "set -e; cd '$FRONTEND_DIR'; \
   npm pkg set 'dependencies.zone.js=~0.14.10'; \
   npm pkg set 'dependencies.ngx-socket-io=4.6.0'; \
   npm pkg set 'dependencies.@auth0/angular-jwt=^5.2.0'; \
-  node -e \"const fs=require('fs');const p=require('./package.json'); if(p.dependencies && p.dependencies.zone){delete p.dependencies.zone;} fs.writeFileSync('package.json', JSON.stringify(p,null,2));\"; \
+  node -e \"const fs=require('fs'); const p=require('./package.json'); if (p.dependencies && p.dependencies.zone) { delete p.dependencies.zone; } fs.writeFileSync('package.json', JSON.stringify(p, null, 2));\"; \
   node -e \"const p=require('./package.json'); console.log('zone.js aktuell:', p.dependencies['zone.js']); console.log('ngx-socket-io aktuell:', p.dependencies['ngx-socket-io']); console.log('angular-jwt aktuell:', p.dependencies['@auth0/angular-jwt']);\"; \
   rm -rf node_modules package-lock.json; \
   npm config set registry 'https://registry.npmjs.org/'; \
-  npm cache clean --force; \
-  npm install --legacy-peer-deps"
+  export npm_config_cache='/home/ubuntu/.npm/_cacache'; \
+  export TMPDIR='/home/ubuntu/tmp'; mkdir -p '\$TMPDIR'; \
+  npm cache clean --force || true; \
+  rm -rf /home/ubuntu/.npm/_cacache || true;"
+
+# ========= INSTALL =========
+echo '==> Dependencies installieren'
+ssh "$REMOTE" "set -e; cd '$FRONTEND_DIR'; npm install --legacy-peer-deps"
 
 # ========= BUILD =========
 echo '==> Build (production)'
 ssh "$REMOTE" "set -e; cd '$FRONTEND_DIR'; npx ng build --configuration=production"
 
 # ========= DEPLOY =========
-# Dein Build schreibt direkt nach Frontend/www (nicht dist/*). Deshalb von www deployen.
+# Hinweis: Dein Build schreibt nach Frontend/www (nicht dist/*).
 echo "==> Deploy nach $WEBROOT (rsync --delete)"
 ssh "$REMOTE" "set -e; rsync -av --delete '$FRONTEND_DIR'/www/ '$WEBROOT'/"
 
