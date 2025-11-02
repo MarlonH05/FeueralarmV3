@@ -6,7 +6,7 @@ set -euo pipefail
 # ==== KONFIGURATION (anpassen) ====
 REMOTE="my-ec2"                                    # SSH-Alias (siehe ~/.ssh/config)
 APP_DIR="/var/www/feueralarm"                      # Zielpfad auf EC2
-BRANCH="main"                                      # Branch
+BRANCH="dev"                                      # Branch
 REPO_URL="git@github.com:MarlonH05/FeueralarmV3.git"            # SSH-Repo-URL (z. B. git@github.com:ORG/REPO.git)
 SERVICE_NAME="feueralarm"                          # systemd-Service-Name (z. B. feueralarm)
 
