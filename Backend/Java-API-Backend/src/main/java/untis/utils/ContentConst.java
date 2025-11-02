@@ -1,14 +1,14 @@
 package untis.utils;
 
+import config.ConfigLoader;
+
 public class ContentConst {
 
-    public static final String REQUEST_URL = "https://nessa.webuntis.com/WebUntis/jsonrpc.do?school=BS-Bad+Hersfeld";
-
-    public static final String USERNAME = "Proj12Inf";
-
-    public static final String PASSWORD = "Voellig_Egal12";
-
-    public static final String API_KEY = "W2MCAVAWK62BJJSX";
+    // Load from .env file
+    public static final String REQUEST_URL = ConfigLoader.getUntisUrl();
+    public static final String USERNAME = ConfigLoader.getUntisUsername();
+    public static final String PASSWORD = ConfigLoader.getUntisPassword();
+    public static final String API_KEY = ConfigLoader.getUntisApiKey();
 
     public static final String AUTH_CONTENT =
             "{" +
