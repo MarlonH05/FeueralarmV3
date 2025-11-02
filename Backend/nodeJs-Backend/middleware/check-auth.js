@@ -4,30 +4,33 @@ module.exports = (req, res, next) => {
   try {
     const token = req.headers.authorization.split(" ")[1];
     const decodedToken = jwt.verify(token, process.env.JWT_KEY);
-    req.userData = {email: decodedToken.email, userId: decodedToken.userId, role: decodedToken.role};
+    req.userData = {
+      username: decodedToken.username, // GEÄNDERT: email -> username
+      userId: decodedToken.userId,
+      role: decodedToken.role,
+    };
     next();
   } catch (error) {
-    res.status(401).json({message: "You are not authenticated!"});
+    res.status(401).json({ message: "You are not authenticated!" });
   }
-}
+};
 
 module.exports.checkAuth = (token) => {
   try {
     const decodedToken = jwt.verify(token, process.env.JWT_KEY);
     let userData = {
-      email: decodedToken.email, 
-      userId: decodedToken.userId, 
-      role: decodedToken.role
+      username: decodedToken.username, // GEÄNDERT: email -> username
+      userId: decodedToken.userId,
+      role: decodedToken.role,
     };
     return {
-      authenticated : true,
-      userData
+      authenticated: true,
+      userData,
+    };
+  } catch (error) {
+    return {
+      authenticated: false,
+      message: error.message,
     };
   }
-  catch (error) {
-    return {
-      authenticated : false,
-      message: error.message
-    }
-  }  
 };
