@@ -1,18 +1,18 @@
-package untis.utils;
+package utils;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
-import untis.beans.ClassBean;
-import untis.beans.TeacherBean;
-import untis.beans.TimeUnitBean;
+import beans.ClassBean;
+import beans.TeacherBean;
+import beans.TimeUnitBean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +29,12 @@ public class WebUntis {
             httpPost.setHeader("Content-type", "application/json");
 
             String responseBody = client.execute(httpPost, response -> {
-                int status = response.getStatusLine().getStatusCode();
+                int status = response.getCode();
                 if (status >= 200 && status < 300) {
                     HttpEntity entity1 = response.getEntity();
                     return entity1 != null ? EntityUtils.toString(entity1) : null;
                 } else {
-                    throw new ClientProtocolException("Unexpected response status: " + status);
+                    throw new RuntimeException("Unexpected response status: " + status);
                 }
             });
 

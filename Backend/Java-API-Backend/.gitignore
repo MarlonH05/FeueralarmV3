@@ -1,0 +1,13 @@
+# Environment Variables
+.env
+*.env
+
+# Build
+build/
+.gradle/
+*.class
+
+# IDE
+.idea/
+*.iml
+.vscode/
