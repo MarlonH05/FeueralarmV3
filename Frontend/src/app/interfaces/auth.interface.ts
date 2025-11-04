@@ -1,5 +1,5 @@
 export interface AuthCredentials {
-  email: string;
+  username: string;
   password: string;
   token?: string;
 }
@@ -11,7 +11,7 @@ export interface LoginResponse {
 }
 
 export interface DecodedToken {
-  email: string;
+  username: string;
   userId: string;
   role: string;
   iat: number;
