@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # ========= KONFIG =========
-REMOTE="my-ec2"                                 # SSH-Alias aus ~/.ssh/config
+REMOTE="my-ec3"                                 # SSH-Alias aus ~/.ssh/config
 APP_ROOT="/var/www/feueralarm"                  # Basisverzeichnis auf EC2
 REPO_DIR="$APP_ROOT/FeueralarmV3"               # Git-Repo auf EC2
 FRONTEND_DIR="$REPO_DIR/Frontend"               # Angular/Ionic Frontend-Verzeichnis
