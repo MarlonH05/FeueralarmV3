@@ -43,7 +43,7 @@ import { environment } from '../../../environments/environment';
 })
 export class LoginPage implements OnInit {
   credentials = {
-    email: '',
+    username: '',
     password: '',
   };
 
@@ -77,7 +77,7 @@ export class LoginPage implements OnInit {
   }
 
   async login() {
-    if (!this.credentials.email || !this.credentials.password) {
+    if (!this.credentials.username || !this.credentials.password) {
       await this.feedbackService.showErrorToast('Bitte alle Felder ausfüllen');
       return;
     }
@@ -90,7 +90,7 @@ export class LoginPage implements OnInit {
       if (result.success) {
         if (this.stayLoggedIn) {
           localStorage.setItem('stayloggedin', 'true');
-          localStorage.setItem('user', this.credentials.email);
+          localStorage.setItem('user', this.credentials.username);
           localStorage.setItem('password', this.credentials.password);
         }
 

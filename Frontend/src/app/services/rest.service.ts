@@ -10,7 +10,7 @@ import { NavController } from '@ionic/angular';
 import { JwtHelperService } from '@auth0/angular-jwt';
 
 interface AuthCredentials {
-  email: string;
+  username: string;
   password: string;
   token?: string;
 }
@@ -39,7 +39,7 @@ export class RestService {
   private readonly jwtHelper = new JwtHelperService();
 
   private authSubject = new BehaviorSubject<AuthCredentials>({
-    email: '',
+    username: '',
     password: '',
     token: '',
   });
@@ -61,7 +61,7 @@ export class RestService {
 
     if (token && email && !this.jwtHelper.isTokenExpired(token)) {
       const decoded = this.jwtHelper.decodeToken(token);
-      this.authSubject.next({ email, password: '', token });
+      this.authSubject.next({ username:'', password: '', token });
       this.roleSubject.next(decoded.role);
     }
   }
@@ -72,7 +72,7 @@ export class RestService {
     try {
       // backend expects a `username` field; map email -> username for the request
       const payload = {
-        username: credentials.email,
+        username: credentials.username,
         password: credentials.password,
       };
       const response = await this.http
@@ -91,7 +91,7 @@ export class RestService {
 
         // Store auth data
         localStorage.setItem('auth-token', response.token);
-        localStorage.setItem('auth-email', credentials.email);
+        localStorage.setItem('auth-email', credentials.username);
 
         // Start auto-refresh
         this.startTokenRefresh(credentials);
@@ -123,7 +123,7 @@ export class RestService {
       try {
         // refresh token using username mapped from stored email
         const refreshPayload = {
-          username: credentials.email,
+          username: credentials.username,
           password: credentials.password,
         };
         const response = await this.http
@@ -148,7 +148,7 @@ export class RestService {
       clearInterval(this.loggedInTimer);
     }
 
-    this.authSubject.next({ email: '', password: '', token: '' });
+    this.authSubject.next({ username: '', password: '', token: '' });
     this.roleSubject.next('');
 
     localStorage.removeItem('auth-token');
@@ -180,12 +180,12 @@ export class RestService {
     const token = this.getToken();
     return token !== '' && !this.jwtHelper.isTokenExpired(token);
   }
-  getAuthValue(): { email: string; password: string; token?: string } {
+  getAuthValue(): { username: string; password: string; token?: string } {
     return this.authSubject.value;
   }
 
   getEmail(): string {
-    return this.authSubject.value.email;
+    return this.authSubject.value.username;
   }
   // ==========================================
   // HTTP HELPERS
@@ -285,7 +285,7 @@ export class RestService {
 
     // Setze Auth
     this.authSubject.next({
-      email: 'test@bso.de',
+      username: 'test@bso.de',
       password: 'test123',
       token: fakeToken,
     });
