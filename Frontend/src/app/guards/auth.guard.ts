@@ -6,13 +6,11 @@ export const authGuard: CanActivateFn = (route, state) => {
   const restService = inject(RestService);
   const router = inject(Router);
 
-  if (restService.isAuthenticated()) {
-    return true;
-  }
-
-  // Redirect to login
-  router.createUrlTree(['/login']);
-  return false;
+  return restService.isAuthenticated()
+    ? true
+    : router.createUrlTree(['/login'], {
+        queryParams: { redirect: state.url },
+      });
 };
 
 export const loginGuard: CanActivateFn = (route, state) => {
@@ -20,10 +18,5 @@ export const loginGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   // Wenn bereits eingeloggt, redirect zu home
-  if (restService.isAuthenticated()) {
-    router.createUrlTree(['/home']);
-    return false;
-  }
-
-  return true;
+  return restService.isAuthenticated() ? router.createUrlTree(['/home']) : true;
 };
