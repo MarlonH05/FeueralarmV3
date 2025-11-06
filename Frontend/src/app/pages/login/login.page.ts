@@ -96,7 +96,9 @@ export class LoginPage implements OnInit {
         }
 
         await this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
-        this.router.navigate(['/home']);
+        console.log('login result:', result);
+        const ok = this.router.navigate(['/home']);
+        console.log('navigate ok?', ok);
       } else {
         await this.feedbackService.showErrorToast(
           result.error || 'Anmeldung fehlgeschlagen'
