@@ -1,7 +1,7 @@
-import { Component, OnInit, NgZone } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   IonContent,
   IonButton,
@@ -26,7 +26,6 @@ import { RestService } from '../../services/rest.service';
 import { FeedbackService } from '../../services/feedback.service';
 import { ThemeService } from '../../services/theme.service';
 import { environment } from '../../../environments/environment';
-
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
@@ -58,9 +57,7 @@ export class LoginPage implements OnInit {
     private restService: RestService,
     private feedbackService: FeedbackService,
     private themeService: ThemeService,
-    private router: Router,
-    private route: ActivatedRoute,
-    private zone: NgZone
+    private router: Router
   ) {
     addIcons({
       flame,
@@ -89,14 +86,9 @@ export class LoginPage implements OnInit {
     this.isLoading = true;
 
     try {
-      const result: { success: boolean; error?: string } =
-        await this.restService.login(this.credentials);
-      console.log('login result:', result);
+      const result = await this.restService.login(this.credentials);
 
-      if (result.success === true) {
-        // Auth-Flag setzen, das dein Guard prüft
-        localStorage.setItem('isAuthenticated', 'true');
-
+      if (result.success) {
         if (this.stayLoggedIn) {
           localStorage.setItem('stayloggedin', 'true');
           localStorage.setItem('user', this.credentials.username);
@@ -104,16 +96,9 @@ export class LoginPage implements OnInit {
         }
 
         await this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
-
-        // Optional: redirect-Param auswerten (falls der Guard ihn setzt)
-        const target =
-          this.route.snapshot.queryParamMap.get('redirect') || '/home';
-
-        // Navigation in Angular Zone und Promise korrekt awaiten
-        this.zone.run(async () => {
-          const ok = await this.router.navigate([target]);
-          console.log('navigate ok?', ok);
-        });
+        console.log('login result:', result);
+        const ok = this.router.navigate(['/home']);
+        console.log('navigate ok?', ok);
       } else {
         await this.feedbackService.showErrorToast(
           result.error || 'Anmeldung fehlgeschlagen'
@@ -135,21 +120,11 @@ export class LoginPage implements OnInit {
     this.isLoading = true;
 
     try {
-      const result: { success: boolean; error?: string } =
-        await this.restService.testLogin();
+      const result = await this.restService.testLogin();
 
-      if (result.success === true) {
+      if (result.success) {
         await this.feedbackService.showSuccessToast('Test-Login erfolgreich!');
-        const target =
-          this.route.snapshot.queryParamMap.get('redirect') || '/home';
-        this.zone.run(async () => {
-          const ok = await this.router.navigate([target]);
-          console.log('navigate ok?', ok);
-        });
-      } else {
-        await this.feedbackService.showErrorToast(
-          result.error || 'Test-Login fehlgeschlagen'
-        );
+        this.router.navigate(['/home']);
       }
     } catch (error) {
       console.error('Test-Login error:', error);
