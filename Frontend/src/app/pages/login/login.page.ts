@@ -96,7 +96,9 @@ export class LoginPage implements OnInit {
       const result = await this.restService.login(this.credentials);
       console.log('✅ Login Resultat:', result);
 
-      if (result.success) {
+      if (result && result.success) {
+        console.log('📝 Speichere Login-Daten...');
+
         // Speichere Login-Daten wenn gewünscht
         if (this.stayLoggedIn) {
           localStorage.setItem('stayloggedin', 'true');
@@ -104,24 +106,34 @@ export class LoginPage implements OnInit {
           localStorage.setItem('password', this.credentials.password);
         }
 
-        // Toast anzeigen
-        await this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
+        console.log('📢 Zeige Erfolgs-Toast...');
+        // Toast anzeigen (ohne await - soll parallel laufen)
+        this.feedbackService.showSuccessToast('Erfolgreich angemeldet!');
 
-        // ⚠️ WICHTIG: isLoading VORHER auf false setzen,
-        // damit UI nicht blockiert ist während Navigation
+        console.log('🔓 Setze isLoading auf false...');
+        // ⚠️ WICHTIG: isLoading VORHER auf false setzen
         this.isLoading = false;
 
-        // Navigation mit replaceUrl um zurück-Button zu verhindern
-        console.log('🚀 Navigiere zu /home...');
-        const navigationSuccess = await this.router.navigate(['/home'], {
-          replaceUrl: true,
-        });
-        console.log('✅ Navigation erfolgreich:', navigationSuccess);
+        console.log('🚀 Starte Navigation zu /home...');
+        // Navigation mit replaceUrl und setTimeout als Fallback
+        setTimeout(async () => {
+          try {
+            const navigationSuccess = await this.router.navigate(['/home'], {
+              replaceUrl: true,
+            });
+            console.log('✅ Navigation erfolgreich:', navigationSuccess);
+          } catch (navError) {
+            console.error('❌ Navigation Error:', navError);
+            // Fallback: Hard reload
+            window.location.href = '/home';
+          }
+        }, 100);
       } else {
         // Login fehlgeschlagen
+        console.log('❌ Login fehlgeschlagen:', result?.error);
         this.isLoading = false;
         await this.feedbackService.showErrorToast(
-          result.error || 'Anmeldung fehlgeschlagen'
+          result?.error || 'Anmeldung fehlgeschlagen'
         );
       }
     } catch (error: any) {
@@ -131,7 +143,6 @@ export class LoginPage implements OnInit {
         'Verbindungsfehler. Bitte versuche es erneut.'
       );
     }
-    // KEIN finally Block mehr - isLoading wird bereits vorher gesetzt
   }
 
   async testLogin() {

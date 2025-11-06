@@ -6,10 +6,17 @@ export const authGuard: CanActivateFn = (route, state) => {
   const restService = inject(RestService);
   const router = inject(Router);
 
-  if (restService.isAuthenticated()) {
+  console.log('🛡️ Auth Guard prüft Zugriff auf:', state.url);
+
+  const isAuthenticated = restService.isAuthenticated();
+  console.log('🔐 Authentifiziert:', isAuthenticated);
+
+  if (isAuthenticated) {
+    console.log('✅ Auth Guard: Zugriff erlaubt');
     return true;
   }
 
+  console.log('❌ Auth Guard: Zugriff verweigert, redirect zu /login');
   // Redirect to login
   router.navigate(['/login']);
   return false;
@@ -19,11 +26,17 @@ export const loginGuard: CanActivateFn = (route, state) => {
   const restService = inject(RestService);
   const router = inject(Router);
 
+  console.log('🛡️ Login Guard prüft bereits eingeloggt...');
+
+  const isAuthenticated = restService.isAuthenticated();
+
   // Wenn bereits eingeloggt, redirect zu home
-  if (restService.isAuthenticated()) {
+  if (isAuthenticated) {
+    console.log('✅ Bereits eingeloggt, redirect zu /home');
     router.navigate(['/home']);
     return false;
   }
 
+  console.log('✅ Nicht eingeloggt, Login-Seite erlaubt');
   return true;
 };
