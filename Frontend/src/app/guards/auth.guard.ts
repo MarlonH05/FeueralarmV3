@@ -11,7 +11,7 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   // Redirect to login
-  router.navigate(['/login']);
+  router.createUrlTree(['/login']);
   return false;
 };
 
@@ -21,7 +21,7 @@ export const loginGuard: CanActivateFn = (route, state) => {
 
   // Wenn bereits eingeloggt, redirect zu home
   if (restService.isAuthenticated()) {
-    router.navigate(['/home']);
+    router.createUrlTree(['/home']);
     return false;
   }
 
