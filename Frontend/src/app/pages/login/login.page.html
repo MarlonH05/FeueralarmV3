@@ -56,12 +56,7 @@
         </div>
 
         <!-- Login Button -->
-        <button
-          type="submit"
-          class="login-button"
-          [disabled]="isLoading"
-          (click)="login()"
-        >
+        <button type="submit" class="login-button" [disabled]="isLoading">
           <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
           <span *ngIf="!isLoading">
             <ion-icon name="log-in-outline"></ion-icon>
