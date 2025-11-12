@@ -127,31 +127,30 @@ export class LoginPage implements OnInit {
           localStorage.setItem('user', this.credentials.username);
         }
 
-        // Toast je nach Modus
+        // Toast (OHNE await - parallel laufen lassen)
         if (result.isOffline) {
-          await this.feedbackService.showSuccessToast(
+          this.feedbackService.showSuccessToast(
             '📴 Offline-Login erfolgreich!'
           );
         } else {
-          await this.feedbackService.showSuccessToast(
-            '🟢 Online-Login erfolgreich!'
-          );
+          this.feedbackService.showSuccessToast('🟢 Online-Login erfolgreich!');
         }
 
+        // WICHTIG: isLoading SOFORT auf false setzen
         this.isLoading = false;
 
-        // Navigation
-        setTimeout(async () => {
-          try {
-            const navigationSuccess = await this.router.navigate(['/home'], {
-              replaceUrl: true,
-            });
-            console.log('✅ Navigation erfolgreich:', navigationSuccess);
-          } catch (navError) {
-            console.error('❌ Navigation Error:', navError);
+        // Navigation direkt ohne setTimeout
+        console.log('🚀 Navigiere zu /home...');
+        this.router.navigate(['/home'], { replaceUrl: true }).then(
+          (success) => {
+            console.log('✅ Navigation erfolgreich:', success);
+          },
+          (error) => {
+            console.error('❌ Navigation fehlgeschlagen:', error);
+            // Fallback: Hard reload
             window.location.href = '/home';
           }
-        }, 100);
+        );
       } else {
         // Login fehlgeschlagen
         console.log('❌ Login fehlgeschlagen:', result?.error);
