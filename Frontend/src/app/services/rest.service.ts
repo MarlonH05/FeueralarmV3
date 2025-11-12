@@ -172,11 +172,11 @@ export class RestService {
   ): Promise<{ success: boolean; error?: string; isOffline?: boolean }> {
     console.log('🔐 Login gestartet:', credentials.username);
 
-    // 1. Prüfe Online-Status
-    const online = await this.isOnline();
+    // Verwende navigator.onLine für schnelle Prüfung
+    const quickOnlineCheck = navigator.onLine;
 
-    if (online) {
-      // ONLINE LOGIN
+    if (quickOnlineCheck) {
+      // ONLINE LOGIN (schnell, ohne extra Server-Check)
       return this.onlineLogin(credentials);
     } else {
       // OFFLINE LOGIN
