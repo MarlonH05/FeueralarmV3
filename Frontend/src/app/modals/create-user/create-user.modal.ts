@@ -69,8 +69,11 @@ export class CreateUserModal {
   }
 
   async createUser() {
+    console.log('➕ Create User aufgerufen mit:', this.userData);
+
     // Validation
     if (!this.userData.username || !this.userData.password) {
+      console.log('⚠️ Validierung fehlgeschlagen: Felder fehlen');
       await this.feedbackService.showWarningToast(
         'Bitte alle Felder ausfüllen'
       );
@@ -78,21 +81,26 @@ export class CreateUserModal {
     }
 
     if (this.userData.password.length < 6) {
+      console.log('⚠️ Validierung fehlgeschlagen: Passwort zu kurz');
       await this.feedbackService.showWarningToast(
         'Passwort muss mindestens 6 Zeichen lang sein'
       );
       return;
     }
 
+    console.log('✅ Validierung erfolgreich, starte API Call...');
     this.isSubmitting = true;
 
     try {
       this.userManagementService.createUser(this.userData).subscribe({
-        next: async () => {
+        next: async (response) => {
+          console.log('✅ User erstellt! Response:', response);
           this.isSubmitting = false;
           await this.modalCtrl.dismiss({ created: true });
+          console.log('✅ Modal dismissed with created: true');
         },
         error: async (error) => {
+          console.error('❌ Fehler beim Erstellen:', error);
           this.isSubmitting = false;
           await this.feedbackService.showError(
             error,
@@ -101,6 +109,7 @@ export class CreateUserModal {
         },
       });
     } catch (error) {
+      console.error('❌ Catch Error:', error);
       this.isSubmitting = false;
       await this.feedbackService.showError(
         error,
@@ -110,6 +119,7 @@ export class CreateUserModal {
   }
 
   cancel() {
+    console.log('❌ User-Erstellung abgebrochen');
     this.modalCtrl.dismiss({ created: false });
   }
 }
