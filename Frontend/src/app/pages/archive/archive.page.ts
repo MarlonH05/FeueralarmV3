@@ -27,6 +27,9 @@ import {
   timeOutline,
   eyeOutline,
   archiveOutline,
+  checkmarkCircle,
+  closeCircle,
+  chevronForwardOutline,
 } from 'ionicons/icons';
 
 import { AlarmService, AlarmData } from '../../services/alarm.service';
@@ -86,6 +89,9 @@ export class ArchivePage implements OnInit {
       timeOutline,
       eyeOutline,
       archiveOutline,
+      checkmarkCircle,
+      closeCircle,
+      chevronForwardOutline,
     });
   }
 
@@ -103,14 +109,12 @@ export class ArchivePage implements OnInit {
 
       this.alarmService.getAllAlarms().subscribe({
         next: (response: any) => {
-          // ✅ Typ hinzugefügt
           console.log('✅ Alarme geladen:', response);
           this.alarms = response.alerts;
           this.applyFilter();
           this.isLoading = false;
         },
         error: async (error: any) => {
-          // ✅ Typ hinzugefügt
           console.error('❌ Fehler beim Laden der Alarme:', error);
           this.isLoading = false;
           await this.feedbackService.showError(
@@ -173,8 +177,8 @@ export class ArchivePage implements OnInit {
 
       this.alarmService.getAlarmById(alarm._id).subscribe({
         next: async (response: any) => {
-          // ✅ Typ hinzugefügt
           console.log('✅ Alarm-Details geladen:', response);
+
           await this.feedbackService.hideLoading();
 
           // Parse und zeige die Daten auf der Home-Seite an
@@ -193,7 +197,6 @@ export class ArchivePage implements OnInit {
           });
         },
         error: async (error: any) => {
-          // ✅ Typ hinzugefügt
           await this.feedbackService.hideLoading();
           await this.feedbackService.showError(
             error,
