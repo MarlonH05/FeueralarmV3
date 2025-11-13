@@ -32,6 +32,7 @@ import {
   checkmarkCircle,
   searchOutline,
   peopleOutline,
+  archiveOutline, // ✅ Archive Icon hinzugefügt
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -146,6 +147,7 @@ export class HomePage implements OnInit, OnDestroy {
       checkmarkCircle,
       searchOutline,
       peopleOutline,
+      archiveOutline, // ✅ Archive Icon registriert
     });
   }
 
@@ -507,6 +509,11 @@ export class HomePage implements OnInit, OnDestroy {
 
   openUserManagement(): void {
     this.router.navigate(['/admin-users']);
+  }
+
+  // ✅ Neue Methode für Archive-Navigation
+  openArchive(): void {
+    this.router.navigate(['/archive']);
   }
 
   async openSettings(): Promise<void> {
