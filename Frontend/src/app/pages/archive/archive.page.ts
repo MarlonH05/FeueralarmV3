@@ -1,0 +1,228 @@
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import {
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
+  IonButtons,
+  IonButton,
+  IonIcon,
+  IonSegment,
+  IonSegmentButton,
+  IonLabel,
+  IonBadge,
+  IonRefresher,
+  IonRefresherContent,
+  IonSpinner,
+} from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import {
+  arrowBack,
+  refresh,
+  calendarOutline,
+  peopleOutline,
+  timeOutline,
+  eyeOutline,
+  archiveOutline,
+} from 'ionicons/icons';
+
+import { AlarmService, AlarmData } from '../../services/alarm.service';
+import { FeedbackService } from '../../services/feedback.service';
+import { DataService } from '../../services/data.service';
+
+@Component({
+  selector: 'app-archive',
+  templateUrl: './archive.page.html',
+  styleUrls: ['./archive.page.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
+    IonButtons,
+    IonButton,
+    IonIcon,
+    IonSegment,
+    IonSegmentButton,
+    IonLabel,
+    IonBadge,
+    IonRefresher,
+    IonRefresherContent,
+    IonSpinner,
+  ],
+})
+export class ArchivePage implements OnInit {
+  alarms: AlarmData[] = [];
+  filteredAlarms: AlarmData[] = [];
+  filterStatus: 'all' | 'active' | 'archived' = 'all';
+  isLoading = true;
+
+  // Stats
+  get activeAlarmsCount(): number {
+    return this.alarms.filter((a) => !a.archived).length;
+  }
+
+  get archivedAlarmsCount(): number {
+    return this.alarms.filter((a) => a.archived).length;
+  }
+
+  constructor(
+    private alarmService: AlarmService,
+    private feedbackService: FeedbackService,
+    private dataService: DataService,
+    private router: Router
+  ) {
+    addIcons({
+      arrowBack,
+      refresh,
+      calendarOutline,
+      peopleOutline,
+      timeOutline,
+      eyeOutline,
+      archiveOutline,
+    });
+  }
+
+  ngOnInit() {
+    this.loadAlarms();
+  }
+
+  // ==========================================
+  // DATA LOADING
+  // ==========================================
+
+  async loadAlarms() {
+    try {
+      this.isLoading = true;
+
+      this.alarmService.getAllAlarms().subscribe({
+        next: (response: any) => {
+          // ✅ Typ hinzugefügt
+          console.log('✅ Alarme geladen:', response);
+          this.alarms = response.alerts;
+          this.applyFilter();
+          this.isLoading = false;
+        },
+        error: async (error: any) => {
+          // ✅ Typ hinzugefügt
+          console.error('❌ Fehler beim Laden der Alarme:', error);
+          this.isLoading = false;
+          await this.feedbackService.showError(
+            error,
+            'Fehler beim Laden der Alarme'
+          );
+        },
+      });
+    } catch (error) {
+      this.isLoading = false;
+      await this.feedbackService.showError(
+        error,
+        'Fehler beim Laden der Alarme'
+      );
+    }
+  }
+
+  async doRefresh(event: any) {
+    await this.loadAlarms();
+    event.target.complete();
+  }
+
+  async refreshAlarms() {
+    await this.feedbackService.showLoading('Aktualisiere...');
+    await this.loadAlarms();
+    await this.feedbackService.hideLoading();
+    await this.feedbackService.showSuccessToast('Alarme aktualisiert!');
+  }
+
+  // ==========================================
+  // FILTERING
+  // ==========================================
+
+  applyFilter() {
+    switch (this.filterStatus) {
+      case 'active':
+        this.filteredAlarms = this.alarms.filter((a) => !a.archived);
+        break;
+      case 'archived':
+        this.filteredAlarms = this.alarms.filter((a) => a.archived);
+        break;
+      default:
+        this.filteredAlarms = [...this.alarms];
+    }
+  }
+
+  onFilterChange() {
+    this.applyFilter();
+  }
+
+  // ==========================================
+  // ALARM ACTIONS
+  // ==========================================
+
+  async viewAlarmDetails(alarm: AlarmData) {
+    console.log('📋 Alarm Details anzeigen:', alarm._id);
+
+    try {
+      await this.feedbackService.showLoading('Lade Alarm-Details...');
+
+      this.alarmService.getAlarmById(alarm._id).subscribe({
+        next: async (response: any) => {
+          // ✅ Typ hinzugefügt
+          console.log('✅ Alarm-Details geladen:', response);
+          await this.feedbackService.hideLoading();
+
+          // Parse und zeige die Daten auf der Home-Seite an
+          const teachers = this.dataService.parseTeachersFromAPI(
+            response.posts
+          );
+
+          console.log('👥 Parsed Teachers:', teachers);
+
+          // Navigiere zur Home-Seite mit den Alarm-Daten
+          this.router.navigate(['/home'], {
+            state: {
+              alarmData: response,
+              isArchive: true,
+            },
+          });
+        },
+        error: async (error: any) => {
+          // ✅ Typ hinzugefügt
+          await this.feedbackService.hideLoading();
+          await this.feedbackService.showError(
+            error,
+            'Fehler beim Laden der Alarm-Details'
+          );
+        },
+      });
+    } catch (error) {
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showError(
+        error,
+        'Fehler beim Laden der Alarm-Details'
+      );
+    }
+  }
+
+  // ==========================================
+  // HELPERS
+  // ==========================================
+
+  formatAlarmDate(dateString: string): string {
+    return this.alarmService.formatAlarmDate(dateString);
+  }
+
+  getTimeSince(dateString: string): string {
+    return this.alarmService.getTimeSince(dateString);
+  }
+
+  goBack() {
+    this.router.navigate(['/home']);
+  }
+}
