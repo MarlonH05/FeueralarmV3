@@ -17,6 +17,10 @@ import {
   IonLabel,
   IonSearchbar,
   IonSpinner,
+  IonChip, // ← NEU
+  IonCard, // ← NEU
+  IonCardContent, // ← NEU
+  IonProgressBar, // ← NEU
   ModalController,
 } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -76,6 +80,10 @@ import { InformationModal } from '../modals/information/information.modal';
     IonLabel,
     IonSearchbar,
     IonSpinner,
+    IonChip, // ← NEU
+    IonCard, // ← NEU
+    IonCardContent, // ← NEU
+    IonProgressBar, // ← NEU
   ],
 })
 export class HomePage implements OnInit, OnDestroy {
@@ -411,7 +419,7 @@ export class HomePage implements OnInit, OnDestroy {
       const status = this.dataService.statusToAPIString(TeacherState.PRESENT);
 
       if (this.socketService) {
-        this.socketService.updatePost(teacher.id, status);
+        await this.socketService.updatePost(teacher.id, status);
       } else {
         // Ohne Socket: Nur lokale Änderung
         this.applyFilters();
@@ -428,7 +436,7 @@ export class HomePage implements OnInit, OnDestroy {
       );
 
       if (this.socketService) {
-        this.socketService.updatePost(teacher.id, status);
+        await this.socketService.updatePost(teacher.id, status);
       } else {
         // Ohne Socket: Nur lokale Änderung
         this.applyFilters();
@@ -449,7 +457,7 @@ export class HomePage implements OnInit, OnDestroy {
       teacher.comment = comment.trim();
 
       if (this.socketService) {
-        this.socketService.updateComment(teacher.id, comment.trim());
+        await this.socketService.updateComment(teacher.id, comment.trim());
       }
     }
   }
@@ -466,7 +474,7 @@ export class HomePage implements OnInit, OnDestroy {
       teacher.comment = '';
 
       if (this.socketService) {
-        this.socketService.updateComment(teacher.id, ' ');
+        await this.socketService.updateComment(teacher.id, ' ');
       }
     }
   }
