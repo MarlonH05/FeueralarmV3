@@ -464,16 +464,33 @@ export class HomePage implements OnInit, OnDestroy {
         const day = moment().format('YYYYMMDD');
 
         if (this.socketService) {
+          // Mit Socket - normaler Weg
           this.socketService.triggerAlert(this.selectedHour, day);
           await this.delay(2000);
           await this.feedbackService.hideLoading();
           await this.feedbackService.showSuccessToast('Feueralarm ausgelöst!');
           await this.loadData();
         } else {
-          await this.feedbackService.hideLoading();
-          await this.feedbackService.showWarningToast(
-            'Alarm-Funktion ohne Socket nicht verfügbar'
+          // Ohne Socket - Erstelle Mock-Alarm für Tests
+          console.log(
+            '📦 Kein Socket verfügbar - erstelle Test-Alarm mit Mock-Daten'
           );
+
+          await this.delay(1000);
+          await this.feedbackService.hideLoading();
+          await this.feedbackService.showSuccessToast(
+            'Test-Alarm ausgelöst! (Mock-Daten)'
+          );
+
+          console.log(
+            `📚 Erstelle Mock-Daten für ${this.getHourLabel(this.selectedHour)}`
+          );
+
+          // Erstelle Mock-Daten für diese Stunde
+          this.teachers = this.getMockTeachersForAlarm();
+          this.applyFilters();
+          this.updateStats();
+          this.isLoading = false;
         }
       } catch (error) {
         await this.feedbackService.hideLoading();
@@ -483,6 +500,88 @@ export class HomePage implements OnInit, OnDestroy {
         );
       }
     }
+  }
+
+  /**
+   * Erstellt Mock-Lehrer-Daten für einen Test-Alarm
+   */
+  private getMockTeachersForAlarm(): Teacher[] {
+    const hourLabel = this.getHourLabel(this.selectedHour);
+
+    return [
+      {
+        id: 'mock-1',
+        names: ['Max Mustermann', 'Anna Schmidt'],
+        class: '10A',
+        classNumber: 'IT101',
+        room: ['R101', 'R102'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-2',
+        names: ['Thomas Müller'],
+        class: '11B',
+        classNumber: 'BW201',
+        room: ['R205'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-3',
+        names: ['Julia Weber'],
+        class: '12C',
+        classNumber: 'EL301',
+        room: ['R312'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-4',
+        names: ['Peter Schneider', 'Klaus Fischer'],
+        class: '9D',
+        classNumber: 'MET202',
+        room: ['W103'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-5',
+        names: ['Maria Wagner'],
+        class: '13A',
+        classNumber: 'BWL401',
+        room: ['H201'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-6',
+        names: ['Stefan Becker'],
+        class: '10B',
+        classNumber: 'IT102',
+        room: ['R103'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-7',
+        names: ['Lisa Hoffmann'],
+        class: '11A',
+        classNumber: 'BW101',
+        room: ['R201'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+      {
+        id: 'mock-8',
+        names: ['Michael Braun', 'Sandra Klein'],
+        class: '12A',
+        classNumber: 'EL201',
+        room: ['R310', 'R311'],
+        state: TeacherState.OPEN,
+        comment: '',
+      },
+    ];
   }
 
   private getHourLabel(time: string): string {
