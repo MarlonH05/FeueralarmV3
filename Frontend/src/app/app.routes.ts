@@ -27,4 +27,9 @@ export const routes: Routes = [
       ),
     canActivate: [authGuard],
   },
+  {
+    path: 'archive',
+    loadComponent: () =>
+      import('./pages/archive/archive.page').then((m) => m.ArchivePage),
+  },
 ];

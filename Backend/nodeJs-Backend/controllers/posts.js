@@ -99,6 +99,10 @@ exports.updatePost = async (data) => {
       if (result.n > 0) {
         result = await Alert.updateOne({ _id: post.alert }, { updated: time });
 
+        // NEU: Stats aktualisieren
+        const AlertController = require("./alerts");
+        await AlertController.updateAlertStats(post.alert);
+
         return {
           success: true,
           msg: "Update der Klasse war erfolgreich.",
@@ -192,7 +196,6 @@ exports.alert = async (data) => {
 
     let date = new Date();
     date.setHours(date.getHours() + 1);
-    //date.setHours(date.getHours() + 2);
     day = date.getFullYear() * 10000 + (date.getMonth() + 1) * 100 + date.getDate();
     if (data.day) day = data.day;
 
@@ -212,11 +215,19 @@ exports.alert = async (data) => {
     if (debugging) console.log("posts worked");
 
     try {
-      //let result = await Post.deleteMany({});
       let result = await Alert.updateMany({}, { archived: true });
-      //let result = await Alert.deleteMany({});
       let timeStamp = posts[0].created;
-      let alert = await Alert.create({ classCount: posts.length, created: timeStamp, updated: timeStamp });
+      let alert = await Alert.create({
+        classCount: posts.length,
+        created: timeStamp,
+        updated: timeStamp,
+        stats: {
+          total: posts.length,
+          complete: 0,
+          incomplete: 0,
+          undefined: posts.length,
+        },
+      });
 
       try {
         for (let post of posts) post.alert = alert._id;
