@@ -449,6 +449,9 @@ export class HomePage implements OnInit, OnDestroy {
   // ==========================================
 
   async triggerAlarm(): Promise<void> {
+    console.log('🚨 triggerAlarm() wurde aufgerufen!');
+    alert('triggerAlarm wurde aufgerufen!'); // Debug
+
     const confirmed = await this.feedbackService.showConfirm(
       'Feueralarm auslösen',
       `Möchtest du den Feueralarm für die ${this.getHourLabel(
