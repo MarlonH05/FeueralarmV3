@@ -71,7 +71,7 @@ export class AttachmentModalComponent implements OnInit {
   constructor(
     private modalCtrl: ModalController,
     private actionSheetCtrl: ActionSheetController,
-    private photoService: PhotoService,
+    public photoService: PhotoService,
     private feedbackService: FeedbackService
   ) {
     addIcons({
@@ -372,6 +372,10 @@ export class AttachmentModalComponent implements OnInit {
       attachment.mimeType?.startsWith('image/') ||
       false
     );
+  }
+
+  openAttachment(url: string): void {
+    window.open(url, '_blank');
   }
 
   close() {

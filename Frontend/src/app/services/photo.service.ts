@@ -289,4 +289,18 @@ export class PhotoService {
     const match = dataUrl.match(/^data:([^;]+);/);
     return match ? match[1] : 'application/octet-stream';
   }
+
+  /**
+   * Formatiert Datum für Anzeige
+   */
+  formatDate(dateString: string): string {
+    const date = new Date(dateString);
+    return date.toLocaleString('de-DE', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  }
 }
