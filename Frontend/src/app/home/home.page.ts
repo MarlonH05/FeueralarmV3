@@ -32,7 +32,10 @@ import {
   checkmarkCircle,
   searchOutline,
   peopleOutline,
-  archiveOutline, // ✅ Archive Icon hinzugefügt
+  archiveOutline,
+  wifi, // ← NEU
+  cloudOffline, // ← NEU
+  syncOutline, // ← NEU
 } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import moment from 'moment';
@@ -44,6 +47,7 @@ import {
 } from '../interfaces/teacher.interface';
 import { RestService } from '../services/rest.service';
 import { SocketService } from '../services/socket.service';
+import { SyncService } from '../services/sync.service'; // ← NEU
 import { DataService } from '../services/data.service';
 import { FeedbackService } from '../services/feedback.service';
 import { SettingsService } from '../services/settings.service';
@@ -89,6 +93,11 @@ export class HomePage implements OnInit, OnDestroy {
   selectedStatus: string = '4'; // 4 = All
   sortBy: 'teacher' | 'class' = 'teacher';
 
+  // *** NEU: Sync Status ***
+  isOnline = true;
+  isSyncing = false;
+  pendingActions = 0;
+
   // Stats
   stats = {
     total: 0,
@@ -119,7 +128,8 @@ export class HomePage implements OnInit, OnDestroy {
     private feedbackService: FeedbackService,
     private settingsService: SettingsService,
     private modalCtrl: ModalController,
-    private router: Router
+    private router: Router,
+    private syncService: SyncService // ← NEU
   ) {
     // Socket Service optional injizieren
     try {
@@ -147,7 +157,10 @@ export class HomePage implements OnInit, OnDestroy {
       checkmarkCircle,
       searchOutline,
       peopleOutline,
-      archiveOutline, // ✅ Archive Icon registriert
+      archiveOutline,
+      wifi, // ← NEU
+      cloudOffline, // ← NEU
+      syncOutline, // ← NEU
     });
   }
 
@@ -160,6 +173,20 @@ export class HomePage implements OnInit, OnDestroy {
     this.selectedStatus = this.settingsService
       .getDefaultStatusAsNumber()
       .toString();
+
+    // *** NEU: Sync-Status überwachen ***
+    this.subscriptions.push(
+      this.syncService.getOnlineStatus().subscribe((online) => {
+        this.isOnline = online;
+        console.log(online ? '🟢 Online' : '🔴 Offline');
+      }),
+      this.syncService.isSyncing().subscribe((syncing) => {
+        this.isSyncing = syncing;
+      }),
+      this.syncService.getPendingActionsCount().subscribe((count) => {
+        this.pendingActions = count;
+      })
+    );
 
     // Socket nur verbinden wenn verfügbar
     if (this.socketService && !this.socketService.isSocketConnected()) {
@@ -644,6 +671,32 @@ export class HomePage implements OnInit, OnDestroy {
     });
 
     await modal.present();
+  }
+
+  // ==========================================
+  // SYNC
+  // ==========================================
+
+  async forceSyncNow(): Promise<void> {
+    if (!this.isOnline) {
+      await this.feedbackService.showWarningToast('Keine Internetverbindung');
+      return;
+    }
+
+    try {
+      await this.feedbackService.showLoading('Synchronisiere...');
+      await this.syncService.forceSyncNow();
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showSuccessToast(
+        'Synchronisation erfolgreich!'
+      );
+    } catch (error) {
+      await this.feedbackService.hideLoading();
+      await this.feedbackService.showError(
+        error,
+        'Synchronisation fehlgeschlagen'
+      );
+    }
   }
 
   // ==========================================
