@@ -6,7 +6,7 @@ export interface Teacher {
   room?: string[];
   state?: TeacherState;
   comment?: string;
-  attachments?: Attachment[];
+  attachments?: Attachment[]; // ← NEU: Fotos & Dateien
 }
 
 export interface Attachment {
